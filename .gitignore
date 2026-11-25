@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.tif
+*.tiff
+*.laz
+*.las
+*.npz
+*_summary.txt
+*_log.txt
+lidar_cache/
+windows/python/
+*.zip
