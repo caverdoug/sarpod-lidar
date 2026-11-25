@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- README: where files go, cache contents and size, cleaning up, keeping it current, sharing a cache.
+
 ## 0.1.0 (2026-11-24) - first public release
 
 - Understory share from leaf-off USGS 3DEP lidar (returns 0.5-3 m above ground vs all returns below 3 m).

@@ -48,14 +48,52 @@ In the map window, double-click the map to set the center (or type `lat, lon`), 
 
 Useful flags: `--source auto|aws|usgs`, `--no-terrain`, `--workers 16`, `--set-cache`, `--list-only`.  Run `python lidar_sweep_map.py -h` for all of them.
 
-## Lidar sources and caching
+## Lidar sources
 
 - **Amazon** (default when it covers the area): the public `usgs-lidar-public` Entwine Point Tiles copy of 3DEP.  Only the pieces inside your area are fetched, and it is not throttled.
 - **USGS**: whole LAZ tiles from The National Map.  Slow (about 0.1 MB/s per connection) but has collections Amazon lacks.  Downloads are size-checked and resumed.
 
-The lidar cache folder can be a shared drive (for example a Google Drive folder) so several computers share it: set `SARPOD_LIDAR_CACHE` or run **Set lidar cache folder.bat**.  Processed ground is saved in 500 m squares (about 4 MB per km²), so a second run nearby takes seconds.  Squares are rebuilt automatically if the source lidar changes.
-
 Rough speed on one desktop: 1.3-1.5 km² per minute once the lidar is local.
+
+## Where files go
+
+| What | Default location (Windows) | Change it with |
+| --- | --- | --- |
+| Lidar downloads | `C:\Users\<you>\SARPOD\lidar_cache` | **Lidar cache...** button, **Set lidar cache folder.bat**, `--set-cache`, or the `SARPOD_LIDAR_CACHE` environment variable |
+| Processed ground (reusable 500 m squares) | `<lidar cache>\_processed` | moves with the lidar cache |
+| Finished maps (GeoTIFFs + summary) | your Downloads folder, or next to the SARTopo export if you loaded one | **Save maps in...** button, `--out` |
+
+On Mac and Linux the default cache is `~/SARPOD/lidar_cache`.  The chosen cache folder is remembered in `~/SARPOD/lidar_cache_location.txt`; the environment variable, if set, wins over it.
+
+### What's in the cache
+
+```
+lidar_cache\
+  <USGS project>\                      whole USGS LAZ tiles (often 50-170 MB each)
+  AWS_<collection>\ept-data\           small Amazon pieces (only the ones your areas needed)
+  AWS_<collection>\ept-hierarchy\      Amazon index files
+  _aws_index\                          list of collections on Amazon (refreshed every 30 days)
+  _processed\<source>_<collection>\v1\ processed 500 m squares (E_N.npz) + crs.wkt
+```
+
+### How big it gets
+
+- **Lidar is the big part.**  A 2 km radius circle is typically a few GB of USGS tiles (tiles run past the circle's edge), less from Amazon since only the pieces inside the area come down.  A large box can run to tens of GB.  Put the cache on a drive with room to spare.
+- **Processed squares are small**: about 3-4.5 MB per km².  A 250 km² box is around 1 GB.
+
+### Cleaning up
+
+- **Lidar folders can be deleted** once an area is processed.  Runs over ground that is already processed don't need the lidar at all.  If something later needs it (a new area next door, or a new version of the tool that changes how ground is processed), it is downloaded again.
+- **Keep `_processed`.**  That is what makes repeat runs fast; deleting it means reprocessing from lidar.
+- Partly downloaded files (`.part`) are resumed on the next run; you don't need to delete them.
+
+### Keeping it current
+
+Every run checks which lidar is best for the area.  Amazon collections are re-checked weekly; if one has been updated, its cached pieces are cleared and the affected squares rebuilt.  USGS tiles are checked by file size.  A newer collection or a new processing version means squares are rebuilt rather than reused.
+
+### Sharing a cache between computers
+
+Point every computer at the same folder (for example in Google Drive for desktop) with **Set lidar cache folder.bat**.  Processing done on one computer is then reused by the others.  With Google Drive, mark the folder "Available offline": reading thousands of small Amazon pieces straight from the cloud is several times slower.
 
 ## Limits
 
