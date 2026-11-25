@@ -33,7 +33,7 @@ The "metres" come from two placeholder constants (W_open 15 m, K 6) and a bell-s
 
 ### Windows (no Python install)
 
-Download the zip from the [Releases](https://github.com/<owner>/sarpod-lidar/releases) page, unzip it anywhere, and double-click **SARPOD Lidar.bat**.
+Download the zip from the [Releases](https://github.com/caverdoug/sarpod-lidar/releases) page, unzip it anywhere, and double-click **SARPOD Lidar.bat**.
 
 ### Any platform
 
